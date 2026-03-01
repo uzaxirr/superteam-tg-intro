@@ -14,6 +14,34 @@ A Telegram bot that onboards new members by requiring them to introduce themselv
 - **Persistent storage** — SQLite database survives restarts
 - **Edge case handling** — Leave & rejoin, bot restart, deleted intros
 
+## Demo
+
+### Enforcement — Non-introduced users can't chat
+
+When a user who hasn't introduced themselves tries to send a message in the main group, the bot automatically deletes it and sends a reminder pointing them to the Intro Channel.
+
+![Enforcement](screenshots/01_enforcement.png)
+
+### Intro Validation & Acceptance
+
+Once the user posts a valid introduction in the Intro Channel, the bot validates it and confirms acceptance. The user is notified in both the intro channel and the main group.
+
+![Intro Accepted](screenshots/02_intro_accepted.png)
+
+### Post-Intro — Full Access Granted
+
+After completing their introduction, the user can freely participate in the main group with no restrictions.
+
+![Post Intro](screenshots/03_post_intro.png)
+
+### Admin Stats
+
+Admins can use `/stats` to get a quick overview of onboarding progress — total tracked users, pending intros, and completed intros.
+
+![Admin Stats](screenshots/04_admin_stats.png)
+
+---
+
 ## Setup
 
 ### Prerequisites
@@ -136,6 +164,7 @@ tg-mal/
 │   │   └── admin.py          # Admin commands
 │   └── utils/
 │       └── validation.py     # Intro format heuristic checker
+├── screenshots/              # Demo screenshots
 ├── .env.example
 ├── Dockerfile
 ├── docker-compose.yml
