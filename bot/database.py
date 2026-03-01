@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import aiosqlite
 from bot.config import DB_PATH

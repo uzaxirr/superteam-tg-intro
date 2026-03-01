@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import ContextTypes, MessageHandler, filters
 
 from bot.config import INTRO_CHANNEL_ID, INTRO_REMINDER, MAIN_GROUP_ID
-from bot.database import STATUS_INTRODUCED, get_user
+from bot.database import STATUS_INTRODUCED, add_user, get_user
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,10 @@ async def handle_main_group_message(update: Update, context: ContextTypes.DEFAUL
     # If user is not in DB or not introduced, enforce
     if db_user and db_user["status"] == STATUS_INTRODUCED:
         return
+
+    # Ensure untracked users get added to DB as pending
+    if not db_user:
+        await add_user(user.id, user.username, user.full_name)
 
     # Delete the message
     try:

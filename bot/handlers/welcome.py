@@ -66,7 +66,12 @@ async def handle_chat_member(update: Update, context: ContextTypes.DEFAULT_TYPE)
             user_id=user.id,
             permissions=ChatPermissions(
                 can_send_messages=False,
-                can_send_media_messages=False,
+                can_send_audios=False,
+                can_send_documents=False,
+                can_send_photos=False,
+                can_send_videos=False,
+                can_send_video_notes=False,
+                can_send_voice_notes=False,
                 can_send_polls=False,
                 can_send_other_messages=False,
                 can_add_web_page_previews=False,
