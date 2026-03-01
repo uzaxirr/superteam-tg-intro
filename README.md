@@ -16,29 +16,52 @@ A Telegram bot that onboards new members by requiring them to introduce themselv
 
 ## Demo
 
-### Enforcement — Non-introduced users can't chat
+### Quick Overview
+
+![Demo](screenshots/demo.gif)
+
+### Live Test Groups
+
+Want to try it yourself? Join the test groups and experience the full onboarding flow:
+
+1. **Join the main group:** [Superteam MY Test](https://t.me/+vRitdSyP82w3MmQ1)
+2. **Join the intro channel:** [Superteam MY Intros](https://t.me/+GXFccFwx0_E1Mjg1)
+3. Try sending a message in the main group — it will be deleted with a reminder
+4. Post your intro in the intro channel — the bot will validate and approve you
+5. Now you can chat freely in the main group
+
+> A [demo video](screenshots/demo.mp4) is also available in the repo.
+
+### Screenshots
+
+<details>
+<summary>Click to expand screenshots</summary>
+
+#### Enforcement — Non-introduced users can't chat
 
 When a user who hasn't introduced themselves tries to send a message in the main group, the bot automatically deletes it and sends a reminder pointing them to the Intro Channel.
 
 ![Enforcement](screenshots/enforcement.png)
 
-### Intro Validation & Acceptance
+#### Intro Validation & Acceptance
 
 Once the user posts a valid introduction in the Intro Channel, the bot validates it and confirms acceptance. The user is notified in both the intro channel and the main group.
 
 ![Intro Accepted](screenshots/intro_accepted.png)
 
-### Post-Intro — Full Access Granted
+#### Post-Intro — Full Access Granted
 
 After completing their introduction, the user can freely participate in the main group with no restrictions.
 
 ![Post Intro](screenshots/post_intro.png)
 
-### Admin Stats
+#### Admin Stats
 
 Admins can use `/stats` to get a quick overview of onboarding progress — total tracked users, pending intros, and completed intros.
 
 ![Admin Stats](screenshots/admin_stats.png)
+
+</details>
 
 ---
 
