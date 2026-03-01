@@ -1,18 +1,17 @@
 # Superteam MY — Telegram Onboarding Bot
 
-A Telegram bot that onboards new members by requiring them to introduce themselves in a dedicated Intro Channel before they can participate in the main group.
+A Telegram bot that onboards new members in the Superteam Malaysia group by requiring them to introduce themselves before they can participate. Everything happens in a single group — no separate channels needed.
 
 ## Features
 
-- **New member detection** — Detects when users join the main group via `ChatMemberUpdated`
-- **Auto-restriction** — New members cannot send messages in the main group until they introduce themselves
+- **New member detection** — Detects when users join via `ChatMemberUpdated`
 - **Welcome message** — Sends a formatted welcome with the intro template and an example
+- **Soft enforcement** — Messages from non-introduced users are auto-deleted with a reminder
 - **Intro validation** — Heuristic check that the introduction roughly follows the expected format
-- **Auto-unrestriction** — Once a valid intro is posted, the user gains full access to the main group
-- **Enforcement** — Messages from non-introduced users in the main group are auto-deleted with a reminder
+- **Instant access** — Once a valid intro is posted in the group, the user can chat freely
 - **Admin commands** — `/reset`, `/approve`, `/status`, `/stats`
 - **Persistent storage** — SQLite database survives restarts
-- **Edge case handling** — Leave & rejoin, bot restart, deleted intros
+- **Edge case handling** — Leave & rejoin, bot restart, partial intros get a nudge
 
 ## Demo
 
@@ -20,15 +19,14 @@ A Telegram bot that onboards new members by requiring them to introduce themselv
 
 ![Demo](screenshots/demo.gif)
 
-### Live Test Groups
+### Live Test Group
 
-Want to try it yourself? Join the test groups and experience the full onboarding flow:
+Want to try it yourself? Join the test group and experience the full onboarding flow:
 
-1. **Join the main group:** [Superteam MY Test](https://t.me/+vRitdSyP82w3MmQ1)
-2. **Join the intro channel:** [Superteam MY Intros](https://t.me/+GXFccFwx0_E1Mjg1)
-3. Try sending a message in the main group — it will be deleted with a reminder
-4. Post your intro in the intro channel — the bot will validate and approve you
-5. Now you can chat freely in the main group
+1. **Join the group:** [Superteam MY Test](https://t.me/+vRitdSyP82w3MmQ1)
+2. Try sending a message — it will be deleted with a reminder to introduce yourself
+3. Post your intro in the group following the format — the bot will validate and approve you
+4. Now you can chat freely
 
 > A [demo video](screenshots/demo.mp4) is also available in the repo.
 
@@ -39,25 +37,25 @@ Want to try it yourself? Join the test groups and experience the full onboarding
 
 #### Enforcement — Non-introduced users can't chat
 
-When a user who hasn't introduced themselves tries to send a message in the main group, the bot automatically deletes it and sends a reminder pointing them to the Intro Channel.
+When a user who hasn't introduced themselves tries to send a message, the bot deletes it and sends a reminder with the intro format.
 
 ![Enforcement](screenshots/enforcement.png)
 
 #### Intro Validation & Acceptance
 
-Once the user posts a valid introduction in the Intro Channel, the bot validates it and confirms acceptance. The user is notified in both the intro channel and the main group.
+Once the user posts a valid introduction in the group, the bot validates it and confirms acceptance.
 
 ![Intro Accepted](screenshots/intro_accepted.png)
 
 #### Post-Intro — Full Access Granted
 
-After completing their introduction, the user can freely participate in the main group with no restrictions.
+After completing their introduction, the user can freely participate with no restrictions.
 
 ![Post Intro](screenshots/post_intro.png)
 
 #### Admin Stats
 
-Admins can use `/stats` to get a quick overview of onboarding progress — total tracked users, pending intros, and completed intros.
+Admins can use `/stats` to get a quick overview of onboarding progress.
 
 ![Admin Stats](screenshots/admin_stats.png)
 
@@ -69,28 +67,25 @@ Admins can use `/stats` to get a quick overview of onboarding progress — total
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.9+
 - A Telegram bot token from [@BotFather](https://t.me/BotFather)
-- The bot must be an **admin** in both the main group and the intro channel with permissions to:
+- The bot must be an **admin** in the group with permissions to:
   - Delete messages
-  - Restrict members
   - Send messages
 
 ### BotFather Configuration
 
-**Important:** You must enable "Group Privacy" mode or disable it depending on your needs:
 1. Go to [@BotFather](https://t.me/BotFather)
 2. `/mybots` → Select your bot → Bot Settings → Group Privacy → **Turn OFF**
-   - This allows the bot to see all messages in groups (required for enforcement and intro detection)
+   - This allows the bot to see all messages in the group (required for enforcement and intro detection)
 3. Also enable "Allow Groups?" if not already enabled
 
-### Getting Chat IDs
+### Getting the Chat ID
 
-To get the chat IDs for your groups:
-1. Add the bot to both groups
-2. Send a message in each group
+1. Add the bot to your group
+2. Send a message in the group
 3. Visit `https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates`
-4. Find the `chat.id` values for your groups (they'll be negative numbers like `-1001234567890`)
+4. Find the `chat.id` value for your group (it'll be a negative number like `-1001234567890`)
 
 ### Environment Variables
 
@@ -103,8 +98,7 @@ cp .env.example .env
 | Variable | Description | Required |
 |---|---|---|
 | `BOT_TOKEN` | Telegram bot token from BotFather | Yes |
-| `MAIN_GROUP_ID` | Chat ID of the main group | Yes |
-| `INTRO_CHANNEL_ID` | Chat ID of the intro channel/group | Yes |
+| `MAIN_GROUP_ID` | Chat ID of the group | Yes |
 | `ADMIN_IDS` | Comma-separated Telegram user IDs for admins | Yes |
 | `MIN_INTRO_LENGTH` | Minimum character length for intros (default: 50) | No |
 | `DB_PATH` | SQLite database path (default: `data/bot.db`) | No |
@@ -142,7 +136,7 @@ All commands are restricted to user IDs listed in `ADMIN_IDS`.
 
 | Command | Description | Usage |
 |---|---|---|
-| `/reset` | Reset a user's intro status and re-restrict them | Reply to a message or `/reset <user_id>` |
+| `/reset` | Reset a user's intro status (messages will be deleted again) | Reply to a message or `/reset <user_id>` |
 | `/approve` | Manually approve a user (skip intro requirement) | Reply to a message or `/approve <user_id>` |
 | `/status` | Check a user's onboarding status | Reply to a message or `/status <user_id>` |
 | `/stats` | Show overall onboarding statistics | `/stats` |
@@ -150,40 +144,40 @@ All commands are restricted to user IDs listed in `ADMIN_IDS`.
 ## How It Works
 
 ```
-User joins main group
+User joins group
         │
         ▼
-Bot restricts user (no send permission)
 Bot sends welcome message with intro format
         │
         ▼
-User posts in Intro Channel
+User sends a message
         │
         ▼
-Bot validates intro (heuristic check)
+Bot checks: is this a valid intro?
         │
    ┌────┴────┐
    ▼         ▼
- Valid     Too short
+ Valid     Not an intro
    │         │
    ▼         ▼
-Unrestrict  Nudge to
-in main     add more
-group       detail
+Mark as    Delete message,
+introduced send reminder
+   │
+   ▼
+User can now
+chat freely
 ```
 
 ## Project Structure
 
 ```
-tg-mal/
 ├── bot/
 │   ├── main.py              # Entry point
 │   ├── config.py             # Configuration & message templates
 │   ├── database.py           # SQLite operations
 │   ├── handlers/
 │   │   ├── welcome.py        # New member detection + welcome message
-│   │   ├── intro.py          # Intro channel monitoring + validation
-│   │   ├── enforcement.py    # Main group message filtering
+│   │   ├── group.py          # Message handler: intro validation + enforcement
 │   │   └── admin.py          # Admin commands
 │   └── utils/
 │       └── validation.py     # Intro format heuristic checker
@@ -197,7 +191,7 @@ tg-mal/
 
 ## Validation Logic
 
-The bot uses a heuristic scoring system (not strict enforcement) to check intros:
+The bot uses a heuristic scoring system to check intros:
 
 - **Length** — At least 50 characters
 - **Identity** — Mentions who they are / what they do
@@ -205,4 +199,4 @@ The bot uses a heuristic scoring system (not strict enforcement) to check intros
 - **Fun fact** — Shares something personal
 - **Contribution** — Mentions how they want to contribute
 
-A score of 3/5 or higher is accepted. Below that, the bot gently nudges the user to add more detail without blocking them.
+A score of 3/5 or higher is accepted. Below that, the bot gently nudges the user to add more detail.

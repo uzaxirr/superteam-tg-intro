@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import logging
-from telegram import ChatPermissions, Update
+from telegram import Update
 from telegram.ext import CommandHandler, ContextTypes
 
-from bot.config import ADMIN_IDS, MAIN_GROUP_ID
+from bot.config import ADMIN_IDS
 from bot.database import (
     STATUS_INTRODUCED,
     add_user,
@@ -25,12 +25,10 @@ def _extract_target_user(update: Update) -> tuple[int | None, str | None]:
     """Extract target user ID from reply or command argument."""
     message = update.effective_message
 
-    # Check if replying to someone
     if message.reply_to_message and message.reply_to_message.from_user:
         target = message.reply_to_message.from_user
         return target.id, target.full_name
 
-    # Check command arguments for user ID
     if message.text:
         parts = message.text.split()
         if len(parts) > 1:
@@ -61,28 +59,6 @@ async def cmd_reset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.effective_message.reply_text(f"User {target_id} not found in database.")
         return
 
-    # Re-restrict the user
-    try:
-        await context.bot.restrict_chat_member(
-            chat_id=MAIN_GROUP_ID,
-            user_id=target_id,
-            permissions=ChatPermissions(
-                can_send_messages=False,
-                can_send_audios=False,
-                can_send_documents=False,
-                can_send_photos=False,
-                can_send_videos=False,
-                can_send_video_notes=False,
-                can_send_voice_notes=False,
-                can_send_polls=False,
-                can_send_other_messages=False,
-                can_add_web_page_previews=False,
-                can_invite_users=False,
-            ),
-        )
-    except Exception:
-        logger.exception("Failed to re-restrict user %d", target_id)
-
     display = target_name or str(target_id)
     await update.effective_message.reply_text(
         f"Reset intro status for {display}. They must re-introduce themselves."
@@ -103,34 +79,11 @@ async def cmd_approve(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         return
 
-    # Ensure user exists in DB
     db_user = await get_user(target_id)
     if not db_user:
         await add_user(target_id, None, target_name or "Unknown")
 
     await mark_introduced(target_id, 0)
-
-    # Unrestrict
-    try:
-        await context.bot.restrict_chat_member(
-            chat_id=MAIN_GROUP_ID,
-            user_id=target_id,
-            permissions=ChatPermissions(
-                can_send_messages=True,
-                can_send_audios=True,
-                can_send_documents=True,
-                can_send_photos=True,
-                can_send_videos=True,
-                can_send_video_notes=True,
-                can_send_voice_notes=True,
-                can_send_polls=True,
-                can_send_other_messages=True,
-                can_add_web_page_previews=True,
-                can_invite_users=True,
-            ),
-        )
-    except Exception:
-        logger.exception("Failed to unrestrict user %d", target_id)
 
     display = target_name or str(target_id)
     await update.effective_message.reply_text(f"Manually approved {display}. They can now chat.")
